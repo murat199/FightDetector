@@ -125,7 +125,7 @@ dmypy.json
 
 # ANN
 checkpoints/
-videos/
+static/video/
 images/
 darknet19.pb
 
