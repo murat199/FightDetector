@@ -106,6 +106,7 @@
         socket.on('SocketVideoSource',function(message){
             var videoSource=message.path;
             console.log('Video Source: '+videoSource);
+            $(".box-video video")[0].load();
             $('.box-video video source').attr('src', 'static/video/'+videoSource);
         });
 		socket.on('SocketDetectorComplete',function(message){
