@@ -70,8 +70,8 @@ def DetectorStream():
         ext = os.path.splitext(filename)[1]
         if (ext == ".mp4") or (ext == ".mov"):
             print("File supported moving on...")
-        else:
-            return json.dumps({'status':'OK', 'isError':'true','message':'Yüklenen video formatı desteklenmiyor!'})
+        #else:
+        #    return json.dumps({'status':'OK', 'isError':'true','message':'Yüklenen video formatı desteklenmiyor!'})
         destination = "/".join([target, filename])
         print("Accept incoming file:", filename)
         print("Save it to:", destination)

@@ -92,6 +92,7 @@
 		var counterResponse=0;
 		var isHasCome=false;
 		var globalMesaj="";
+        var lastTime="";
 
 		function sendFrames(){
 			if(frames.length >= 10){
@@ -127,17 +128,9 @@
 					$(".result").text("ŞİDDET VAR");
 					$(".result").css("color","red");
 					counterFightYes++;
-					console.log("Şiddet Var");
-					if(message.isDone=="true"){
-						console.log("Şiddet Bitti");
-						stateFight=false;
-						$(".box-fight").prepend(' - <span style="color:red">'+message.message+'</span><br/>');
-					}else if(message.isDone=="false"){
-						if(!stateFight){
-							console.log("Şiddet Başladı");
-							$(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span>');
-							stateFight=true;
-						}
+					if(lastTime!=message.message){
+						lastTime=message.message;
+						$(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span><br/>');
 					}
 				}else if(message.isStarted=="0"){
 					$(".result").text("ŞİDDET YOK");

@@ -66,7 +66,7 @@
         <div class="row">
             <div class="col-md-12 text-center">
                 <form id="uploadForm" enctype="multipart/form-data">
-                    <div class="custom-file" style="max-width:640px;margin:0 auto;">
+                    <div class="custom-file" style="max-width:640px;margin:0 auto;overflow: hidden;">
                         <input type="file" name="file" accept="video/*" class="custom-file-input" id="customFile">
                         <label class="custom-file-label" for="customFile">Dosya Seç</label>
                     </div>
@@ -101,11 +101,11 @@
         var counterFightNo=0;
         var counterFrame=0;
         var stateFight=false;
+        var lastTime="";
 
         socket.on('SocketVideoSource',function(message){
             var videoSource=message.path;
             console.log('Video Source: '+videoSource);
-            $(".box-video video")[0].load();
             $('.box-video video source').attr('src', 'static/video/'+videoSource);
         });
 		socket.on('SocketDetectorComplete',function(message){
@@ -115,17 +115,9 @@
                 $(".resultTime").text(message.time);
                 $(".resultTime").css("color","red");
                 counterFightYes++;
-                console.log("Şiddet Var");
-                if(message.isDone=="true"){
-                    console.log("Şiddet Bitti");
-                    stateFight=false;
-                    $(".box-fight").prepend(' - <span style="color:red">'+message.message+'</span><br/>');
-                }else if(message.isDone=="false"){
-                    if(!stateFight){
-                        console.log("Şiddet Başladı");
-                        $(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span>');
-                        stateFight=true;
-                    }
+                if(lastTime!=message.message){
+                    lastTime=message.message;
+                    $(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span><br/>');
                 }
             }else if(message.isStarted=="0"){
                 $(".result").text("ŞİDDET YOK");
@@ -141,9 +133,11 @@
             $(".custom-file-input").on("change", function() {
                 var fileName = $(this).val().split("\\").pop();
                 $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+                $('.box-fight').empty();
             });
             $('#uploadForm').on('submit',function(e){
                 e.preventDefault();
+                $('.box-fight').empty();
                 $.ajax({
                     url: '/DetectorStream',
                     type: 'POST',
