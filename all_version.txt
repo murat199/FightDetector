@@ -1,0 +1,128 @@
+CUDA
+----
+Kod : nvcc --version
+Çıktı :
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2018 NVIDIA Corporation
+Built on Sat_Aug_25_21:08:01_CDT_2018
+Cuda compilation tools, release 10.0, V10.0.130
+
+
+CUDA
+----
+Kod : murat@muratpc:~$ cat /usr/local/cuda/version.txt
+Çıktı : 
+CUDA Version 10.0.130
+
+
+
+LIBRARIES
+---------
+Kod : murat@muratpc:~$ source activate fightDetect
+Kod : (fightDetect) murat@muratpc:~$ pip list
+Çıktı : 
+Package              Version  
+-------------------- ---------
+absl-py              0.7.0    
+anaconda-client      1.7.2    
+anaconda-navigator   1.8.4    
+anaconda-project     0.8.2    
+aniso8601            5.1.0    
+asn1crypto           0.24.0   
+astor                0.7.1    
+astroid              2.2.5    
+bleach               1.5.0    
+certifi              2019.3.9 
+cffi                 1.12.1   
+chardet              3.0.4    
+Click                7.0      
+cloudpickle          0.8.0    
+clyent               1.2.2    
+cryptography         2.6.1    
+cycler               0.10.0   
+cytoolz              0.9.0.1  
+dask                 1.1.4    
+decorator            4.3.2    
+Flask                1.0.2    
+Flask-RESTful        0.3.6    
+Flask-SocketIO       3.3.2    
+gast                 0.2.2    
+greenlet             0.4.15   
+grpcio               1.16.1   
+h5py                 2.8.0    
+html5lib             0.9999999
+idna                 2.8      
+imageio              2.5.0    
+ipython-genutils     0.2.0    
+isort                4.3.13   
+itsdangerous         1.1.0    
+Jinja2               2.10     
+jsonschema           2.6.0    
+jupyter-core         4.4.0    
+Keras                2.2.4    
+Keras-Applications   1.0.7    
+Keras-Preprocessing  1.0.9    
+kiwisolver           1.0.1    
+lazy-object-proxy    1.3.1    
+Mako                 1.0.7    
+Markdown             2.6.11   
+MarkupSafe           1.1.1    
+matplotlib           3.0.3    
+mccabe               0.6.1    
+mock                 2.0.0    
+nbformat             4.4.0    
+networkx             2.2      
+numpy                1.16.2   
+olefile              0.46     
+opencv-python        4.0.0.21 
+pathlib              1.0.1    
+pbr                  5.1.3    
+Pillow               5.4.1    
+pip                  19.0.3   
+protobuf             3.6.1    
+psutil               5.5.0    
+pycparser            2.19     
+pycrypto             2.6.1    
+pylint               2.3.1    
+pyOpenSSL            19.0.0   
+pyparsing            2.3.1    
+PySocks              1.6.8    
+python-dateutil      2.8.0    
+python-engineio      3.0.0    
+python-socketio      3.1.2    
+pytz                 2018.9   
+PyWavelets           1.0.2    
+PyYAML               3.13     
+QtPy                 1.6.0    
+requests             2.21.0   
+ruamel-yaml          0.15.71  
+scikit-image         0.15.0   
+scikit-video         1.1.11   
+scipy                1.2.1    
+setuptools           39.1.0   
+six                  1.12.0   
+tensorboard          1.10.0   
+tensorflow           1.13.1   
+tensorflow-estimator 1.13.0   
+termcolor            1.1.0    
+toolz                0.9.0    
+tornado              5.1.1    
+tqdm                 4.31.1   
+traitlets            4.3.2    
+typed-ast            1.3.1    
+urllib3              1.24.1   
+Werkzeug             0.14.1   
+wrapt                1.11.1   
+
+
+
+
+OPERATING SYSTEM
+----------------
+Kod : murat@muratpc:~$ lsb_release -a
+Çıktı : 
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 18.04.2 LTS
+Release:	18.04
+Codename:	bionic
