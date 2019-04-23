@@ -7,13 +7,13 @@
     <meta name="author" content="">
     <title>Landing Page - Start Bootstrap Theme</title>
     <!-- Bootstrap core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom fonts for this template -->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
+    <link href="static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="static/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template -->
-    <link href="css/landing-page.min.css" rel="stylesheet">
+    <link href="static/css/landing-page.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
@@ -24,7 +24,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
                 <a class="navbar-brand" href="/">
-                    <img src="img/nav.png" style="width:40px;" alt="Barış"/>
+                    <img src="static/img/nav.png" style="width:40px;" alt="Barış"/>
                 </a>
                 <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                     <li class="nav-item active">
@@ -54,7 +54,7 @@
         </div>
         <div class="row">
             <div class="col-md-12 text-center" style="padding-top:30px;">
-				<h3 style="color:green" class="result">ŞİDDET YOK</h3>
+				<h3 style="color:green" class="result"></h3>
 				<div class="box-fight">
 				</div>
                 <canvas id="canvas" width="640" height="480" style="visibility:hidden;"></canvas>
@@ -69,9 +69,9 @@
         </div>
     </footer>
     <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="js/socket.io.min.js"></script>
+    <script src="static/vendor/jquery/jquery.min.js"></script>
+    <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/socket.io.min.js"></script>
 
 	<script type="text/javascript">
 		var socket = io.connect('http://' + document.domain + ':' + location.port);
@@ -79,10 +79,16 @@
 		var video = document.getElementById('video');
 		var canvas = document.getElementById('canvas');
 		var context = canvas.getContext('2d');
+		var stateFight=false;
 		var frames=[];
 		var maxFrames=1000;
 		var img;
 		var counter=0;
+		var counterFightYes=0;
+		var counterFightNo=0;
+		var counterLostFrame=0;
+		var counterComplete=0;
+
 		var counterResponse=0;
 		var isHasCome=false;
 		var globalMesaj="";
@@ -109,43 +115,40 @@
 				};
 				if(frames.length>=maxFrames){
 					frames.shift();
+					counterLostFrame++;
 				}
 				frames.push(frameData);
 				setFrames();
 			}, 100);
 		}
-		socket.on('SocketDetectorState',function(message){
-            if(message.isFight=="true"){
-                	
-			}else{
-                $(".result").text("ŞİDDET YOK");
-                $(".result").css("color","green");
-            }
-		});
 		socket.on('SocketDetectorComplete',function(message){
-			if(message.isStarted=="1"){
-				$(".result").text("ŞİDDET VAR");
-            	$(".result").css("color","red");
-				if(message.isDone=="true"){
-					$(".box-fight").prepend('- <span style="color:red">'+message.message+'</span><br/>');
-				}else if(message.isDone=="false"){
-					$(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span>');
+			if(message.isComplete=='false'){
+				if(message.isStarted=="1"){
+					$(".result").text("ŞİDDET VAR");
+					$(".result").css("color","red");
+					counterFightYes++;
+					console.log("Şiddet Var");
+					if(message.isDone=="true"){
+						console.log("Şiddet Bitti");
+						stateFight=false;
+						$(".box-fight").prepend(' - <span style="color:red">'+message.message+'</span><br/>');
+					}else if(message.isDone=="false"){
+						if(!stateFight){
+							console.log("Şiddet Başladı");
+							$(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span>');
+							stateFight=true;
+						}
+					}
+				}else if(message.isStarted=="0"){
+					$(".result").text("ŞİDDET YOK");
+					$(".result").css("color","green");
+					counterFightNo++;
 				}
-			}else if(message.isStarted=="0"){
-				$(".result").text("ŞİDDET YOK");
-            	$(".result").css("color","green");
-			}
-			
-            /*
-			$(".resultDetector").append(message.message+"<br>");
-			counterResponse++;
-			console.log("Alinan cevap sayisi:"+counterResponse);
-			if(message.isDone=="true"){
-				globalMesaj=message.message;
-				isHasCome=true;
+			}else{
+				counterComplete++;
 				sendFrames();
-            }
-            */
+			}
+			console.log("Tamamlanan : "+counterComplete+". Şiddet Yok : "+counterFightNo+". Şiddet Var : "+counterFightYes+". Kayıp Frame : "+counterLostFrame);
 		});
 		$(document).ready(function(){
 			$('#startCamera').click(function(){

@@ -44,17 +44,13 @@ def SocketDetectorWebcam(frames, methods=['GET', 'POST']):
     for item in dataJson['data']:
         netInput = ImageUtils.ConvertImageFrom_CV_to_NetInput(readb64(item["img"]))
         isFighting = violenceDetector.Detect(netInput)
-        #siddet tespit edildi
+        #Siddet tespit edildi
         if isFighting:
-            #response={'isFight':'true'}
-            #socketio.emit('SocketDetectorState', response, callback=MessageReceived)
             isStarted=1
-            response={'isStarted':''+isStarted,'isDone':'false','message':''+str(item['time'])}
+            response={'isComplete':'false','isStarted':''+str(isStarted),'isDone':'false','message':''+str(item['time'])}
             socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
         else:
-            #response={'isFight':'false'}
-            #socketio.emit('SocketDetectorState', response, callback=MessageReceived)
-            response={'isStarted':''+isStarted,'isDone':'true','message':''+str(item['time'])}
+            response={'isComplete':'false','isStarted':''+str(isStarted),'isDone':'true','message':''+str(item['time'])}
             socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
             isStarted=0
     response={'isComplete':'true','message':'tespit bitti'}
