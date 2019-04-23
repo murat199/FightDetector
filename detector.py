@@ -20,6 +20,7 @@ from PIL import Image
 from io import BytesIO
 
 app = Flask(__name__,static_url_path='/static')
+APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app)
 
@@ -32,10 +33,6 @@ def DetectorHome():
 @app.route("/DetectorWebcam")
 def DetectorWebcam():
     return render_template("webcam.html")
-
-@app.route("/DetectorStream")
-def DetectorStream():
-    return render_template("stream.html")
 
 @socketio.on('SocketDetectorWebcam')
 def SocketDetectorWebcam(frames, methods=['GET', 'POST']):
@@ -55,6 +52,65 @@ def SocketDetectorWebcam(frames, methods=['GET', 'POST']):
             isStarted=0
     response={'isComplete':'true','message':'tespit bitti'}
     socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
+
+@app.route("/DetectorStreamGet", methods=["GET"])
+def DetectorStreamGet():
+    return render_template("stream.html")
+
+@app.route("/DetectorStream", methods=["POST"])
+def DetectorStream():
+    isStarted=0
+    target = os.path.join(APP_ROOT, 'static/video/')
+    if not os.path.isdir(target):
+        os.mkdir(target)
+    for upload in request.files.getlist("file"):
+        print("{} is the file name".format(upload.filename))
+        filename = upload.filename
+        # This is to verify files are supported
+        ext = os.path.splitext(filename)[1]
+        if (ext == ".mp4") or (ext == ".mov"):
+            print("File supported moving on...")
+        else:
+            return json.dumps({'status':'OK', 'isError':'true','message':'Yüklenen video formatı desteklenmiyor!'})
+        destination = "/".join([target, filename])
+        print("Accept incoming file:", filename)
+        print("Save it to:", destination)
+        upload.save(destination)
+
+        vidcap = cv2.VideoCapture(destination)
+        fps = vidcap.get(cv2.CAP_PROP_FPS)
+        success, image = vidcap.read()
+        countFrame = 0
+        timeSecond=0
+        timeMinute=0
+
+        response={'path':filename}
+        socketio.emit('SocketVideoSource', response, callback=MessageReceived)
+
+        while success:
+            countFrame += 1
+            if(countFrame > int(fps)):
+                countFrame = 0
+                timeSecond+=1
+                if(timeSecond==60):
+                    timeMinute+=1
+                    timeSecond = 0  
+            netInput = ImageUtils.ConvertImageFrom_CV_to_NetInput(image)
+            isFighting = violenceDetector.Detect(netInput)
+            #siddet tespit edildi
+            if isFighting:
+                isStarted=1
+                timeNow='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+                response={'isComplete':'false','isStarted':''+str(isStarted),'isDone':'false','time':timeNow,'message':timeNow}
+                socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
+            else:
+                timeNow='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+                response={'isComplete':'false','isStarted':''+str(isStarted),'isDone':'false','time':timeNow,'message':timeNow}
+                socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
+                isStarted=0
+            success, image = vidcap.read()
+
+    return json.dumps({'status':'OK','message':'merhaba'})
 
 def readb64(base64_string):
    cleanData = str(base64_string)[len("data:image/jpeg;base64,"):]

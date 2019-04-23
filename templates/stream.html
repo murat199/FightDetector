@@ -7,13 +7,23 @@
     <meta name="author" content="">
     <title>Landing Page - Start Bootstrap Theme</title>
     <!-- Bootstrap core CSS -->
-    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom fonts for this template -->
-    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
+    <link href="static/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <link href="static/vendor/simple-line-icons/css/simple-line-icons.css" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet" type="text/css">
     <!-- Custom styles for this template -->
-    <link href="css/landing-page.min.css" rel="stylesheet">
+    <link href="static/css/landing-page.min.css" rel="stylesheet">
+    <style>
+        .custom-file-input:lang(en) ~ .custom-file-label::after{
+            background-color: #007bff;
+            color: #fff;
+        }
+        .custom-file-label{
+            background-color: #007bff;
+            color: #fff;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
@@ -23,34 +33,136 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-                <a class="navbar-brand" href="#">
-                    <img src="img/nav.png" style="width:40px;" alt="Barış"/>
+                <a class="navbar-brand" href="/">
+                    <img src="static/img/nav.png" style="width:40px;" alt="Barış"/>
                 </a>
                 <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Anasayfa <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="/">Anasayfa <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/DetectorWebcam">WebCam</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/DetectorStream">Uplaod Video</a>
+                        <a class="nav-link" href="/DetectorStreamGet">Uplaod Video</a>
                     </li>
                 </ul>
             </div>    
         </div>
     </nav>
 
-
+    <div class="container">
+        <div class="row text-center">
+            <h3 style="margin:0 auto;margin-top:20px;color:red;" id="errorMessage"></h3>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center box-video">
+                <video style="max-width:640px;width:100%;" controls autoplay>
+                    <source src="" type="video/mp4">
+                    Tarayıcınız bu video uzantısını desteklemiyor!
+                </video>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="custom-file" style="max-width:640px;margin:0 auto;">
+                        <input type="file" name="file" accept="video/*" class="custom-file-input" id="customFile">
+                        <label class="custom-file-label" for="customFile">Dosya Seç</label>
+                    </div>
+                    <button type="submit" class="btn btn-block btn-primary" style="max-width:640px;margin:0 auto;">GÖNDER</button>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 text-center" style="padding-top:30px;">
+                <h3 style="color:green" class="result"></h3>
+                <h3 style="color:green" class="resultTime"></h3>
+                <div class="box-fight">
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
-    <footer class="footer bg-light" style="padding:20px 0px;text-align:center;">
+    <footer class="footer bg-light" style="position:fixed;bottom:0;width:100%;padding:20px 0px;text-align:center;">
         <div class="container">
             <p class="text-muted small mb-4 mb-lg-0">&copy; Your Website 2019. All Rights Reserved.</p>
         </div>
     </footer>
     <!-- Bootstrap core JavaScript -->
-    <script src="vendor/jquery/jquery.min.js"></script>
-    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/vendor/jquery/jquery.min.js"></script>
+    <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="static/js/socket.io.min.js"></script>
+
+	<script type="text/javascript">
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        var counterFightYes=0;
+        var counterFightNo=0;
+        var counterFrame=0;
+        var stateFight=false;
+
+        socket.on('SocketVideoSource',function(message){
+            var videoSource=message.path;
+            console.log('Video Source: '+videoSource);
+            $(".box-video video")[0].load();
+            $('.box-video video source').attr('src', 'static/video/'+videoSource);
+        });
+		socket.on('SocketDetectorComplete',function(message){
+            if(message.isStarted=="1"){
+                $(".result").text("ŞİDDET VAR");
+                $(".result").css("color","red");
+                $(".resultTime").text(message.time);
+                $(".resultTime").css("color","red");
+                counterFightYes++;
+                console.log("Şiddet Var");
+                if(message.isDone=="true"){
+                    console.log("Şiddet Bitti");
+                    stateFight=false;
+                    $(".box-fight").prepend(' - <span style="color:red">'+message.message+'</span><br/>');
+                }else if(message.isDone=="false"){
+                    if(!stateFight){
+                        console.log("Şiddet Başladı");
+                        $(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span>');
+                        stateFight=true;
+                    }
+                }
+            }else if(message.isStarted=="0"){
+                $(".result").text("ŞİDDET YOK");
+                $(".result").css("color","green");
+                $(".resultTime").text(message.time);
+                $(".resultTime").css("color","green");
+                counterFightNo++;
+            }
+            counterFrame++;
+            console.log("Frame : "+counterFrame+". Şiddet Yok : "+counterFightNo+". Şiddet Var : "+counterFightYes);
+		});
+		$(document).ready(function(){
+            $(".custom-file-input").on("change", function() {
+                var fileName = $(this).val().split("\\").pop();
+                $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+            });
+            $('#uploadForm').on('submit',function(e){
+                e.preventDefault();
+                $.ajax({
+                    url: '/DetectorStream',
+                    type: 'POST',
+                    data: new FormData(this),
+                    contentType:false,
+                    processData: false,
+                    success: function(response) {
+                        console.log(response);
+                        if(response.isError=="true"){
+                            $("#errorMessage").text(response.message);
+                        }
+                        alert("Tespit Bitti!");
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                });
+            })
+		});
+	</script>
 </body>
 </html>
