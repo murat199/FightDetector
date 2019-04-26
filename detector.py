@@ -70,29 +70,31 @@ def DetectorStream():
         ext = os.path.splitext(filename)[1]
         if (ext == ".mp4") or (ext == ".mov"):
             print("File supported moving on...")
-        #else:
-        #    return json.dumps({'status':'OK', 'isError':'true','message':'Yüklenen video formatı desteklenmiyor!'})
         destination = "/".join([target, filename])
         print("Accept incoming file:", filename)
         print("Save it to:", destination)
         upload.save(destination)
 
         vidcap = cv2.VideoCapture(destination)
-        fps = vidcap.get(cv2.CAP_PROP_FPS)
-        success, image = vidcap.read()
+        sec = 0
+        #fps = vidcap.get(cv2.CAP_PROP_FPS)
+        fps = 10
+        #it will capture image in each 0.1 second
+        frameRate = 0.1
+        success,image = getFrame(sec,vidcap)
         countFrame = 0
         timeSecond=0
         timeMinute=0
-
         response={'path':filename}
         socketio.emit('SocketVideoSource', response, callback=MessageReceived)
-
         while success:
+            sec = sec + frameRate
+            sec = round(sec, 2)
             countFrame += 1
-            if(countFrame > int(fps)):
+            if(countFrame >= round(fps)):
                 countFrame = 0
-                timeSecond+=1
-                if(timeSecond==60):
+                timeSecond=int(sec)
+                if(timeSecond>=60):
                     timeMinute+=1
                     timeSecond = 0  
             netInput = ImageUtils.ConvertImageFrom_CV_to_NetInput(image)
@@ -108,8 +110,7 @@ def DetectorStream():
                 response={'isComplete':'false','isStarted':''+str(isStarted),'isDone':'false','time':timeNow,'message':timeNow}
                 socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
                 isStarted=0
-            success, image = vidcap.read()
-
+            success,image = getFrame(sec,vidcap)
     return json.dumps({'status':'OK','message':'merhaba'})
 
 def readb64(base64_string):
@@ -117,6 +118,11 @@ def readb64(base64_string):
    imgdata = base64.b64decode(cleanData)
    image = Image.open(BytesIO(imgdata))
    return np.array(image)
+
+def getFrame(sec,vidcap):
+    vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
+    hasFrames,image = vidcap.read()
+    return hasFrames,image
 
 def MessageReceived(methods=['GET', 'POST']):
    print('Message was received!!!')
