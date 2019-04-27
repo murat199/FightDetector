@@ -60,6 +60,8 @@ def DetectorStreamGet():
 @app.route("/DetectorStream", methods=["POST"])
 def DetectorStream():
     isStarted=0
+    baslangicsn=list()
+    bitissn=list()
     target = os.path.join(APP_ROOT, 'static/video/')
     if not os.path.isdir(target):
         os.mkdir(target)
@@ -100,17 +102,35 @@ def DetectorStream():
             netInput = ImageUtils.ConvertImageFrom_CV_to_NetInput(image)
             isFighting = violenceDetector.Detect(netInput)
             #siddet tespit edildi
+            
+            timeNow='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
             if isFighting:
-                isStarted=1
-                timeNow='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
-                response={'isComplete':'false','isStarted':''+str(isStarted),'isDone':'false','time':timeNow,'message':timeNow}
-                socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
+                if len(baslangicsn)==len(bitissn):
+                    timeStart='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+                    baslangicsn.append(timeStart)
+                    response={'isDone':'false','listStart':baslangicsn,'listEnd':bitissn,'time':timeNow}
+                    socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
+                else:
+                    response={'time':timeNow,'isFight':'true'}
+                    socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
             else:
-                timeNow='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
-                response={'isComplete':'false','isStarted':''+str(isStarted),'isDone':'false','time':timeNow,'message':timeNow}
-                socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
-                isStarted=0
+                if len(baslangicsn)!=len(bitissn):
+                    timeEnd='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+                    bitissn.append(timeEnd)
+                    response={'isDone':'false','listStart':baslangicsn,'listEnd':bitissn,'time':timeNow}
+                    socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
+                else:
+                    response={'time':timeNow,'isFight':'false'}
+                    socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
             success,image = getFrame(sec,vidcap)
+    if len(bitissn) == 0:
+        if len(baslangicsn) == 0:
+            timeStart='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)    
+        else:
+            timeEnd='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+        bitissn.append(timeEnd)
+        response={'isDone':'true','listStart':baslangicsn,'listEnd':bitissn}
+        socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
     return json.dumps({'status':'OK','message':'merhaba'})
 
 def readb64(base64_string):

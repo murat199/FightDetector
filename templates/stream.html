@@ -102,6 +102,10 @@
         var counterFrame=0;
         var stateFight=false;
         var lastTime="";
+        
+        var txtFight="";
+        var start=[];
+        var end=[];
 
         socket.on('SocketVideoSource',function(message){
             var videoSource=message.path;
@@ -110,25 +114,48 @@
             $('.box-video video source').attr('src', 'static/video/'+videoSource);
         });
 		socket.on('SocketDetectorComplete',function(message){
-            if(message.isStarted=="1"){
-                $(".result").text("ŞİDDET VAR");
-                $(".result").css("color","red");
-                $(".resultTime").text(message.time);
-                $(".resultTime").css("color","red");
-                counterFightYes++;
-                if(lastTime!=message.message){
-                    lastTime=message.message;
-                    $(".box-fight").prepend('Şiddet Zamanı : <span style="color:red">'+message.message+'</span><br/>');
-                }
-            }else if(message.isStarted=="0"){
-                $(".result").text("ŞİDDET YOK");
-                $(".result").css("color","green");
-                $(".resultTime").text(message.time);
-                $(".resultTime").css("color","green");
-                counterFightNo++;
-            }
             counterFrame++;
-            console.log("Frame : "+counterFrame+". Şiddet Yok : "+counterFightNo+". Şiddet Var : "+counterFightYes);
+            if(message.isDone!=undefined){
+                if(message.listStart.length == message.listEnd.length){
+                    $(".result").text("ŞİDDET YOK");
+                    $(".result").css("color","green");
+                    $(".resultTime").text(message.time);
+                    $(".resultTime").css("color","green");
+                    counterFightNo++;
+                    end=message.listEnd;
+                    txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listEnd[message.listEnd.length-1]+'</span><br/>';
+                    $(".box-fight").append(txtFight);
+                    txtFight="";
+                }else if(message.listStart.length != message.listEnd.length){
+                    $(".result").text("ŞİDDET VAR");
+                    $(".result").css("color","red");
+                    $(".resultTime").text(message.time);
+                    $(".resultTime").css("color","red");
+                    counterFightYes++;
+                    start=message.listStart;
+                    txtFight='Şiddet Baslangıç : <span style="color:red">'+message.listStart[message.listStart.length-1]+'</span>';
+                    $(".box-fight").append(txtFight);
+                }
+                if(message.listStart.length == message.listEnd.length){
+                    $(".result").text("ŞİDDET YOK");
+                    $(".result").css("color","green");
+                    $(".resultTime").text(message.time);
+                    $(".resultTime").css("color","green");
+                    counterFightNo++;
+                    end=message.listEnd;
+                    txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listEnd[message.listEnd.length-1]+'</span><br/>';
+                    $(".box-fight").append(txtFight);
+                    txtFight="";
+                }
+            }else{
+                if(message.isFight=='true'){
+                    $(".resultTime").text(message.time);
+                    $(".resultTime").css("color","red");
+                }else if(message.isFight=='false'){
+                    $(".resultTime").text(message.time);
+                    $(".resultTime").css("color","green");
+                }
+            }
 		});
 		$(document).ready(function(){
             $(".custom-file-input").on("change", function() {
