@@ -114,9 +114,9 @@ def DetectorStream():
                 timeSecond += 1
             netInput = ImageUtils.ConvertImageFrom_CV_to_NetInput(image)
             isFighting = violenceDetector.Detect(netInput)
-            #siddet tespit edildi
             
             timeNow='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+            #siddet tespit edildi
             if isFighting:
                 if len(listStart)==len(listEnd):
                     timeStart='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
@@ -124,8 +124,8 @@ def DetectorStream():
                     response={'isDone':'false','listStart':listStart,'listEnd':listEnd,'time':timeNow}
                     socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
                 else:
-                    timeDummy='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
-                    listDummy.append(timeDummy)
+                    # timeDummy='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+                    # listDummy.append(timeDummy)
                     response={'time':timeNow,'isFight':'true'}
                     socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
             else:
@@ -135,17 +135,20 @@ def DetectorStream():
                     response={'isDone':'false','listStart':listStart,'listEnd':listEnd,'time':timeNow}
                     socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
                 else:
-                    timeDummy='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
-                    listDummy.append(timeDummy)
+                    # timeDummy='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
+                    # listDummy.append(timeDummy)
                     response={'time':timeNow,'isFight':'false'}
                     socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
             success,image = getFrame(sec,vidcap)
+    if len(listStart) > 0 and len(listEnd) > 0 and (len(listStart)==len(listEnd) or len(listStart)-1==len(listEnd)):
+        response={'isFight':'true','listStart':listStart,'listEnd':listEnd}
+        socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
     if len(listEnd) == 0:
         if len(listStart) > 0:
             timeEnd='00:'+str(timeMinute).zfill(2)+':'+str(timeSecond).zfill(2)
             listEnd.append(timeEnd)
-        response={'isDone':'true','listStart':listStart,'listEnd':listEnd}
-        socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
+            response={'isFight':'true','listStart':listStart,'listEnd':listEnd}
+            socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
     return json.dumps({'status':'OK','message':'merhaba'})
 
 def readb64(base64_string):
