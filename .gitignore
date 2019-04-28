@@ -128,5 +128,6 @@ checkpoints/
 static/video/
 images/
 darknet19.pb
+some_image.jpg
 
 # End of
