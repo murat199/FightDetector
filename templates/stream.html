@@ -122,25 +122,36 @@
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","green");
                     counterFightNo++;
-                    end=message.listEnd;
-                    txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listEnd[message.listEnd.length-1]+'</span><br/>';
-                    $(".box-fight").append(txtFight);
-                    txtFight="";
+                    if(message.listEnd[message.listEnd.length-1]!=undefined){
+                        if(end.indexOf(message.listEnd[message.listEnd.length-1])==-1){
+                            end.push(message.listEnd[message.listEnd.length-1]);
+                            txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listEnd[message.listEnd.length-1]+'</span><br/>';
+                            $(".box-fight").append(txtFight);
+                            txtFight="";
+                        }
+                    }
                 }else{
                     $(".result").text("ŞİDDET VAR");
                     $(".result").css("color","red");
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","red");
                     counterFightYes++;
-                    start=message.listStart;
-                    txtFight='Şiddet Baslangıç : <span style="color:red">'+message.listStart[message.listStart.length-1]+'</span>';
-                    $(".box-fight").append(txtFight);
+                    if(start.indexOf(message.listStart[message.listStart.length-1])==-1){
+                        start.push(message.listStart[message.listStart.length-1]);
+                        txtFight='Şiddet Baslangıç : <span style="color:red">'+message.listStart[message.listStart.length-1]+'</span>';
+                        $(".box-fight").append(txtFight);
+                        txtFight="";
+                    }
                 }
             }else{
                 if(message.isFight=='true'){
+                    $(".result").text("ŞİDDET VAR");
+                    $(".result").css("color","red");
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","red");
                 }else if(message.isFight=='false'){
+                    $(".result").text("ŞİDDET YOK");
+                    $(".result").css("color","green");
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","green");
                 }
