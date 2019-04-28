@@ -126,7 +126,7 @@
                     txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listEnd[message.listEnd.length-1]+'</span><br/>';
                     $(".box-fight").append(txtFight);
                     txtFight="";
-                }else if(message.listStart.length != message.listEnd.length){
+                }else{
                     $(".result").text("ŞİDDET VAR");
                     $(".result").css("color","red");
                     $(".resultTime").text(message.time);
@@ -135,17 +135,6 @@
                     start=message.listStart;
                     txtFight='Şiddet Baslangıç : <span style="color:red">'+message.listStart[message.listStart.length-1]+'</span>';
                     $(".box-fight").append(txtFight);
-                }
-                if(message.listStart.length == message.listEnd.length){
-                    $(".result").text("ŞİDDET YOK");
-                    $(".result").css("color","green");
-                    $(".resultTime").text(message.time);
-                    $(".resultTime").css("color","green");
-                    counterFightNo++;
-                    end=message.listEnd;
-                    txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listEnd[message.listEnd.length-1]+'</span><br/>';
-                    $(".box-fight").append(txtFight);
-                    txtFight="";
                 }
             }else{
                 if(message.isFight=='true'){
