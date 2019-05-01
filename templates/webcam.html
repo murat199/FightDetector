@@ -90,22 +90,17 @@
 		var frames=[];
 		var maxFrames=1000;
 		var img;
-		var counter=0;
 		var counterFightYes=0;
 		var counterFightNo=0;
 		var counterLostFrame=0;
-		var counterComplete=0;
 
-		var counterResponse=0;
-		var isHasCome=false;
-		var globalMesaj="";
+		var counterStart=0;
+		var counterEnd=0;
         var lastTime="";
-
-		var counterFF=0;
 
 		function sendFrames(){
 			if(frames.length >= 10){
-				socket.emit('SocketDetectorWebcam',{
+                socket.emit('SocketDetectorWebcam',{
 					data: frames
 				});
 				isReceiveResponse=false;
@@ -121,17 +116,15 @@
 				var now=new Date();
 				var frameData={
 					img:img,
-					time:now.getHours()+":"+now.getMinutes()+":"+now.getSeconds()
+					time:now.getHours()+":"+now.getMinutes()+":"+now.getSeconds(),
+					counterStart:counterStart,
+					counterEnd:counterEnd
 				};
-				if(counterFF<10){
-					counterFF++;
-					console.log(frameData.img);
-				}
 				if(frames.length>=maxFrames){
 					frames.shift();
 					counterLostFrame++;
 				}
-				frames.push(frameData);
+                frames.push(frameData);
 				setFrames();
 			}, 50);
 		}
@@ -143,19 +136,18 @@
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","green");
                     counterFightNo++;
-                    end=message.listEnd;
-                    txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listEnd[message.listEnd.length-1]+'</span><br/>';
-                    $(".box-fight").append(txtFight);
-                    txtFight="";
                 }else{
                     $(".result").text("ŞİDDET VAR");
                     $(".result").css("color","red");
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","red");
                     counterFightYes++;
-                    start=message.listStart;
-                    txtFight='Şiddet Baslangıç : <span style="color:red">'+message.listStart[message.listStart.length-1]+'</span>';
-                    $(".box-fight").append(txtFight);
+                    if(lastTime!=message.time){
+                        lastTime=message.time;
+                        txtFight='Şiddet Zamanı : <span style="color:red">'+lastTime+'</span>';
+                        $(".box-fight").prepend(txtFight);
+                        txtFight="";
+                    }
                 }
             }else{
                 if(message.isFight=='true'){
