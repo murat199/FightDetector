@@ -24,6 +24,8 @@ APP_ROOT = os.path.dirname(os.path.abspath(__file__))
 app.config['SECRET_KEY'] = 'vnkdjnfjknfl1232#'
 socketio = SocketIO(app)
 violenceDetector = ViolenceDetector.ViolenceDetector()
+listStreamStart=list()
+listStreamEnd=list()
 
 @app.route("/")
 def DetectorHome():
@@ -36,27 +38,27 @@ def DetectorWebcam():
 @socketio.on('SocketDetectorWebcam')
 def SocketDetectorWebcam(frames, methods=['GET', 'POST']):
     dataJson = json.loads(str(frames).replace('\'','\"'))
-    listStart=list()
-    listEnd=list()
+    global listStreamEnd
+    global listStreamStart
     for item in dataJson['data']:
         netInput = ImageUtils.ConvertImageFrom_CV_to_NetInput(readb64(item["img"]))
         isFighting = violenceDetector.Detect(netInput)
         timeNow=str(item['time'])
         #Siddet tespit edildi
         if isFighting:
-            if len(listStart)==len(listEnd):
+            if len(listStreamStart)==len(listStreamEnd):
                 timeStart=str(item['time'])
-                listStart.append(timeStart)
-                response={'isDone':'false','listStart':listStart,'listEnd':listEnd,'time':timeNow}
+                listStreamStart.append(timeStart)
+                response={'isDone':'false','listStreamStart':listStreamStart,'listStreamEnd':listStreamEnd,'time':timeNow}
                 socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
             else:
                 response={'time':timeNow,'isFight':'true'}
                 socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
         else:
-            if len(listStart)!=len(listEnd):
+            if len(listStreamStart)!=len(listStreamEnd):
                 timeEnd=str(item['time'])
-                listEnd.append(timeEnd)
-                response={'isDone':'false','listStart':listStart,'listEnd':listEnd,'time':timeNow}
+                listStreamEnd.append(timeEnd)
+                response={'isDone':'false','listStreamStart':listStreamStart,'listStreamEnd':listStreamEnd,'time':timeNow}
                 socketio.emit('SocketDetectorComplete', response, callback=MessageReceived)
             else:
                 response={'time':timeNow,'isFight':'false'}
@@ -93,9 +95,9 @@ def DetectorStream():
         fps = vidcap.get(cv2.CAP_PROP_FPS)
         print("*************************************")
         print("FPS : "+str(fps))
-        fps = 7
+        fps = 5
         #it will capture image in each 0.1 second
-        frameRate = 0.142
+        frameRate = 0.2
         success,image = getFrame(sec,vidcap)
         countFrame = 0
         timeSecond=0

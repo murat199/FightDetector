@@ -97,6 +97,9 @@
 		var counterStart=0;
 		var counterEnd=0;
         var lastTime="";
+        var start=[];
+        var end=[];
+
 
 		function sendFrames(){
 			if(frames.length >= 10){
@@ -130,22 +133,30 @@
 		}
 		socket.on('SocketDetectorComplete',function(message){
             if(message.isDone!=undefined){
-                if(message.listStart.length == message.listEnd.length){
+                if(message.listStreamStart.length == message.listStreamEnd.length){
                     $(".result").text("ŞİDDET YOK");
                     $(".result").css("color","green");
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","green");
                     counterFightNo++;
+                    if(message.listStreamEnd[message.listStreamEnd.length-1]!=undefined){
+                        if(end.indexOf(message.listStreamEnd[message.listStreamEnd.length-1])==-1){
+                            end.push(message.listStreamEnd[message.listStreamEnd.length-1]);
+                            txtFight=' - Şiddet Bitiş : <span style="color:red">'+message.listStreamEnd[message.listStreamEnd.length-1]+'</span><br/>';
+                            $(".box-fight").append(txtFight);
+                            txtFight="";
+                        }
+                    }
                 }else{
                     $(".result").text("ŞİDDET VAR");
                     $(".result").css("color","red");
                     $(".resultTime").text(message.time);
                     $(".resultTime").css("color","red");
                     counterFightYes++;
-                    if(lastTime!=message.time){
-                        lastTime=message.time;
-                        txtFight='Şiddet Zamanı : <span style="color:red">'+lastTime+'</span>';
-                        $(".box-fight").prepend(txtFight);
+                    if(start.indexOf(message.listStreamStart[message.listStreamStart.length-1])==-1){
+                        start.push(message.listStreamStart[message.listStreamStart.length-1]);
+                        txtFight='Şiddet Baslangıç : <span style="color:red">'+message.listStreamStart[message.listStreamStart.length-1]+'</span>';
+                        $(".box-fight").append(txtFight);
                         txtFight="";
                     }
                 }
