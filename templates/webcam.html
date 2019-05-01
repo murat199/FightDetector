@@ -99,6 +99,7 @@
         var lastTime="";
         var start=[];
         var end=[];
+        var counterPush=6000;
 
 
 		function sendFrames(){
@@ -159,6 +160,20 @@
                         $(".box-fight").append(txtFight);
                         txtFight="";
                     }
+                    if(counterPush/60>=5){
+                        $.ajax({
+                            type: "POST",
+                            beforeSend: function (xhr) {
+                                xhr.setRequestHeader('Authorization', 'Bearer o.baI8rwqroFcWZlJQj8ocrFJk7wcn3Qam');
+                            },
+                            url: "https://api.pushbullet.com/v2/pushes",
+                            data: {"type": "note", "title": "Şiddet Tespit Edildi!", "body": "Şiddet zamanı : "+message.listStreamStart[message.listStreamStart.length-1]},
+                            success: function(success){
+                                console.log("push notification başarılı")
+                            }
+                        });
+                        counterPush=0;
+                    }
                 }
             }else{
                 if(message.isFight=='true'){
@@ -218,6 +233,7 @@
 				function zamanGoster () {
 					var saat = new Date();
 					document.getElementById("timeReal").innerHTML = "Gerçek Zaman : "+saat.toLocaleTimeString();
+                    counterPush++;
 				}
 			});
 		});

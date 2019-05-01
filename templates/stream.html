@@ -107,6 +107,8 @@
         var start=[];
         var end=[];
 
+        var counterPush=6000;
+
         socket.on('SocketVideoSource',function(message){
             var videoSource=message.path;
             console.log('Video Source: '+videoSource);
@@ -143,6 +145,20 @@
                         $(".box-fight").append(txtFight);
                         txtFight="";
                     }
+                    if(counterPush/60>=5){
+                        $.ajax({
+                            type: "POST",
+                            beforeSend: function (xhr) {
+                                xhr.setRequestHeader('Authorization', 'Bearer o.baI8rwqroFcWZlJQj8ocrFJk7wcn3Qam');
+                            },
+                            url: "https://api.pushbullet.com/v2/pushes",
+                            data: {"type": "note", "title": "Şiddet Tespit Edildi!", "body": "Şiddet zamanı : "+message.listStart[message.listStart.length-1]},
+                            success: function(success){
+                                console.log("push notification başarılı")
+                            }
+                        });
+                        counterPush=0;
+                    }
                 }
             }else{
                 if(message.isFight=='true'){
@@ -166,6 +182,11 @@
             });
             $('#uploadForm').on('submit',function(e){
                 e.preventDefault();
+                setInterval(zamanGoster, 1000);
+				function zamanGoster () {
+					var saat = new Date();
+					counterPush++;
+				}
                 $('.box-fight').empty();
                 $.ajax({
                     url: '/DetectorStream',
